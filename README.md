@@ -160,3 +160,21 @@ npm start
 ```
 
 ---
+Login and Registration:
+
+https://github.com/user-attachments/assets/7c6af23b-1274-416a-9290-dbcfb45c7b58
+
+Main Comments Page:
+
+https://github.com/user-attachments/assets/c6114a3b-f851-4791-b98f-a597106f1dbb
+
+Add, Edit, Delete, Like, Dislike a Comment:
+
+https://github.com/user-attachments/assets/5640291a-e11c-40a5-9dda-3077446a0197
+
+Pagination + Database (MySQL):
+
+https://github.com/user-attachments/assets/2a738789-d4c1-49c4-8175-8851907f2108
+
+
+
