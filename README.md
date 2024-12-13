@@ -1,70 +1,162 @@
-# Getting Started with Create React App
+# **Comments Section Component**
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## **Project Overview**
+This project implements a nested comments section similar to platforms like LinkedIn or Reddit. It supports parent and child comments, CRUD operations, likes/dislikes, expand/collapse replies, and pagination.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## **Tech Stack**
+- **Frontend:** React  
+- **Backend:** Node.js with Express  
+- **Database:** MySQL  
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## **Features Breakdown**
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### **1. Core Features Overview**
+- **Nested Comments Structure:** Supports parent and child comments.
+- **CRUD Operations:** Create, Read, Update, and Delete comments.
+- **Like/Dislike Functionality:** Tracks user reactions.
+- **Expand/Collapse Replies:** Improves readability.
+- **Pagination:** Loads older comments in batches.
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### **2. Backend Features (Node.js + Express)**
 
-### `npm run build`
+#### **a. Server Configuration (`server.js`)**
+- **Express Server Setup:** Handles incoming requests and routes.
+- **Database Connection:** Uses MySQL for persistent data storage.
+- **Middlewares:** CORS, JSON parsing, and API routes.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+#### **b. API Endpoints**
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. **Authentication (`auth.js`)**
+   - **Register/Login:** Uses JWT for authentication.
+   - **Password Hashing:** Secure password storage.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. **Comments API (`comments.js`)**
 
-### `npm run eject`
+| Endpoint              | Method | Description                |
+|----------------------|--------|----------------------------|
+| `/comments`          | POST   | Adds a new comment/reply   |
+| `/comments`          | GET    | Retrieves comments         |
+| `/comments/:id`      | PUT    | Edits an existing comment  |
+| `/comments/:id`      | DELETE | Deletes a comment/replies  |
+| `/comments/:id/like` | POST   | Likes/Dislikes a comment   |
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+#### **c. Database Schema (`db.js`)**
+1. **`users` Table:** Stores user accounts with secure password hashes.  
+2. **`comments` Table:** Manages comments, with `parent_id` for nesting.  
+3. **`comment_likes` Table:** Tracks likes/dislikes using unique constraints.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### **3. Frontend Features (React)**
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+#### **a. Main App Component (`App.js`)**
+- **React Router Integration:** Manages routing between login, register, and comment pages.
+- **State Management:** Manages comments using `useState` and `useEffect`.
 
-## Learn More
+#### **b. Comments Component (`Comments.js`)**
+- **API Integration:** Fetches comments from the backend using Axios.
+- **Add/Edit/Delete Functionality:** Updates the UI dynamically using API requests.
+- **Comment Rendering:** Displays nested comments in a tree-like structure.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+#### **c. Comment Component (`Comment.js`)**
+- **Rendering Each Comment:** Displays comments with user details, timestamp, likes, and dislikes.
+- **Expand/Collapse Replies:** Toggle functionality for better readability.
+- **Like/Dislike Integration:** Updates like/dislike counts dynamically.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+### **4. Extra Features**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+#### **Authentication:**
+- **Login & Register Pages:** JWT-based authentication with form validation.
 
-### Analyzing the Bundle Size
+#### **Pagination:**
+- Efficiently loads older comments in batches to improve page performance.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## **Database Schema**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```sql
+USE commentsdb;
 
-### Advanced Configuration
+CREATE TABLE users (
+    id VARCHAR(36) PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) UNIQUE,
+    password_hash VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+CREATE TABLE comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL,
+    parent_id INT DEFAULT NULL,
+    text VARCHAR(255) NOT NULL,
+    likes INT DEFAULT 0,
+    dislikes INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
 
-### Deployment
+CREATE TABLE comment_likes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    comment_id INT NOT NULL,
+    user_id VARCHAR(36) NOT NULL,
+    like_status ENUM('like', 'dislike') NOT NULL,
+    UNIQUE (comment_id, user_id),
+    FOREIGN KEY (comment_id) REFERENCES comments(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## **Setup Instructions**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### **1. Clone the Repository**
+```bash
+git clone https://github.com/aashiimathur/comments-section.git
+```
+
+### **2. Install Dependencies**
+```bash
+# Backend
+cd comments-backend
+npm install
+
+# Frontend
+cd ..
+npm install
+```
+
+### **3. Configure the `.env` File**
+Create a `.env` file in the `comments-backend` folder with the following content:
+```plaintext
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=commentsdb
+JWT_SECRET=your_secret_key
+```
+
+### **4. Run the Backend Server**
+```bash
+cd comments-backend
+node server.js
+```
+
+### **5. Run the Frontend Application**
+```bash
+npm start
+```
+
+---
